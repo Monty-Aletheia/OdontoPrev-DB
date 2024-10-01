@@ -50,7 +50,7 @@ CREATE TABLE tb_claim (
     FOREIGN KEY (consultation_id) REFERENCES tb_consultation(id)
 );
 
--- Tabela de associação entre tb_consultation e tb_dentist (Many-to-Many)
+-- Tabela de associaï¿½ï¿½o entre tb_consultation e tb_dentist (Many-to-Many)
 CREATE TABLE consultation_dentist (
     consultation_id RAW(16) NOT NULL,
     dentist_id RAW(16) NOT NULL,
@@ -58,3 +58,15 @@ CREATE TABLE consultation_dentist (
     FOREIGN KEY (consultation_id) REFERENCES tb_consultation(id),
     FOREIGN KEY (dentist_id) REFERENCES tb_dentist(id)
 );
+
+-- DROP TABLE consultation_dentist;
+-- DROP TABLE tb_claim;
+-- DROP TABLE tb_consultation;
+-- DROP TABLE tb_dentist;
+-- DROP TABLE tb_patient;
+
+Select * from consultation_dentist;
+Select * from tb_claim;
+Select * from tb_consultation;
+Select * from tb_dentist;
+Select * from tb_patient;

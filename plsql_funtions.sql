@@ -1,6 +1,6 @@
 SET SERVEROUTPUT ON;
 
--- Blocos AnÙnimos com Consultas
+-- Blocos AnÔøΩnimos com Consultas
 
 -- consulta InnerJoin
 DECLARE
@@ -55,11 +55,11 @@ BEGIN
 END;
 /
 
--- Estruturas de Decis„o e OperaÁıes DML em Blocos AnÙnimos 
+-- Estruturas de DecisÔøΩo e OperaÔøΩÔøΩes DML em Blocos AnÔøΩnimos 
 
 -- UPDATE
 DECLARE
-  v_patient_id RAW(16) := 'SOME_PATIENT_ID'; 
+  v_patient_id RAW(16) := '5E60B8AF1FCB42F68C1A23EE0CA8E2D6'; 
   v_new_risk_status VARCHAR2(50) := 'ALTO RISCO';
   v_patient_exists NUMBER := 0;
 BEGIN
@@ -76,31 +76,35 @@ BEGIN
 
     DBMS_OUTPUT.PUT_LINE('Status de risco do paciente atualizado para: ' || v_new_risk_status);
   ELSE
-    DBMS_OUTPUT.PUT_LINE('Paciente n„o encontrado.');
+    DBMS_OUTPUT.PUT_LINE('Paciente nÔøΩo encontrado.');
   END IF;
 END;
 /
 
 -- DELETE
 DECLARE
-  v_claim_id RAW(16) := 'SOME_CLAIM_ID'; 
+  v_claim_id RAW(16) := '5E60B8AF1FCB42F68C1A23EE0CA8E2D6'; 
   v_claim_value_limit NUMBER := 1000;
   v_claim_value NUMBER := 0;
 BEGIN
-  -- Recupera o valor do sinistro
-  SELECT value
-  INTO v_claim_value
-  FROM tb_claim
-  WHERE id = v_claim_id;
-
-  IF v_claim_value > v_claim_value_limit THEN
-    DELETE FROM tb_claim
+  BEGIN
+    SELECT value
+    INTO v_claim_value
+    FROM tb_claim
     WHERE id = v_claim_id;
+  
+    IF v_claim_value > v_claim_value_limit THEN
+      DELETE FROM tb_claim
+      WHERE id = v_claim_id;
 
-    DBMS_OUTPUT.PUT_LINE('Sinistro com ID ' || v_claim_id || ' deletado com sucesso.');
-  ELSE
-    DBMS_OUTPUT.PUT_LINE('Sinistro com valor abaixo do limite, n„o ser· deletado.');
-  END IF;
+      DBMS_OUTPUT.PUT_LINE('Sinistro com ID ' || v_claim_id || ' deletado com sucesso.');
+    ELSE
+      DBMS_OUTPUT.PUT_LINE('Sinistro com valor abaixo do limite, n√£o ser√° deletado.');
+    END IF;
+  EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+      DBMS_OUTPUT.PUT_LINE('Nenhum sinistro encontrado com o ID ' || v_claim_id);
+  END;
 END;
 /
 

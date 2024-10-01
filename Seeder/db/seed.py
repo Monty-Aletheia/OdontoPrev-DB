@@ -5,11 +5,9 @@ from faker import Faker
 
 fake = Faker()
 
-# Função para gerar UUID
 def generate_uuid():
     return uuid.uuid4().bytes
 
-# Seed para tb_patient
 def seed_patients(cursor, connection, n):
     for _ in range(n):
         id = generate_uuid()
@@ -27,7 +25,6 @@ def seed_patients(cursor, connection, n):
         
     connection.commit()
 
-# Seed para tb_dentist
 def seed_dentists(cursor, connection, n):
     for _ in range(n):
         id = generate_uuid()
@@ -44,7 +41,6 @@ def seed_dentists(cursor, connection, n):
         
     connection.commit()
 
-# Seed para tb_consultation
 def seed_consultations(cursor, connection, n):
     for _ in range(n):
         id = generate_uuid()
@@ -61,7 +57,6 @@ def seed_consultations(cursor, connection, n):
         
     connection.commit()
 
-# Seed para tb_claim
 def seed_claims(cursor, connection, n):
     for _ in range(n):
         id = generate_uuid()
@@ -78,7 +73,6 @@ def seed_claims(cursor, connection, n):
         
     connection.commit()
 
-# Seed para tabela many-to-many consultation_dentist
 def seed_consultation_dentist(cursor, connection, n):
     for _ in range(n):
         consultation_id = fake.random_element(elements=fetch_consultation_ids(cursor))
@@ -91,7 +85,6 @@ def seed_consultation_dentist(cursor, connection, n):
         
     connection.commit()
 
-# Funções auxiliares para buscar ids existentes no banco
 def fetch_patient_ids(cursor):
     cursor.execute("SELECT id FROM tb_patient")
     return [row[0] for row in cursor.fetchall()]
