@@ -1,5 +1,3 @@
-# db/seed.py
-
 import uuid
 from faker import Faker
 
