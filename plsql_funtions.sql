@@ -310,6 +310,93 @@ EXCEPTION
 END;
 /
 
+-- Claim
+
+CREATE OR REPLACE PROCEDURE insert_claim (
+    p_occurrence_date IN DATE,
+    p_value IN NUMBER,
+    p_claim_type IN VARCHAR2,
+    p_suggested_preventive_action IN CLOB,
+    p_consultation_id IN RAW
+) AS
+BEGIN
+    IF p_occurrence_date IS NULL OR p_value IS NULL OR p_consultation_id IS NULL THEN
+        RAISE_APPLICATION_ERROR(-20025, 'Data de ocorrência, valor e ID da consulta são obrigatórios.');
+    END IF;
+
+    IF p_claim_type IS NULL OR LENGTH(p_claim_type) > 50 THEN
+        RAISE_APPLICATION_ERROR(-20026, 'Tipo de reclamação inválido ou excede 50 caracteres.');
+    END IF;
+
+    INSERT INTO tb_claim (occurrence_date, value, claim_type, suggested_preventive_action, consultation_id)
+    VALUES (p_occurrence_date, p_value, p_claim_type, p_suggested_preventive_action, p_consultation_id);
+
+    COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        RAISE_APPLICATION_ERROR(-20027, 'Erro ao inserir reclamação: ' || SQLERRM);
+END insert_tb_claim;
+/
+
+CREATE OR REPLACE PROCEDURE update_claim (
+    p_id IN RAW,
+    p_occurrence_date IN DATE,
+    p_value IN NUMBER,
+    p_claim_type IN VARCHAR2,
+    p_suggested_preventive_action IN CLOB,
+    p_consultation_id IN RAW
+) AS
+BEGIN
+    IF p_id IS NULL OR p_occurrence_date IS NULL OR p_value IS NULL OR p_consultation_id IS NULL THEN
+        RAISE_APPLICATION_ERROR(-20028, 'ID, data de ocorrência, valor e ID da consulta são obrigatórios.');
+    END IF;
+
+    IF p_claim_type IS NULL OR LENGTH(p_claim_type) > 50 THEN
+        RAISE_APPLICATION_ERROR(-20029, 'Tipo de reclamação inválido ou excede 50 caracteres.');
+    END IF;
+
+    UPDATE tb_claim
+    SET occurrence_date = p_occurrence_date,
+        value = p_value,
+        claim_type = p_claim_type,
+        suggested_preventive_action = p_suggested_preventive_action,
+        consultation_id = p_consultation_id,
+        updated_at = CURRENT_TIMESTAMP
+    WHERE id = p_id;
+
+    IF SQL%ROWCOUNT = 0 THEN
+        RAISE_APPLICATION_ERROR(-20030, 'Reclamação não encontrada para atualização.');
+    END IF;
+
+    COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        RAISE_APPLICATION_ERROR(-20031, 'Erro ao atualizar reclamação: ' || SQLERRM);
+END update_tb_claim;
+/
+
+CREATE OR REPLACE PROCEDURE delete_claim (
+    p_id IN RAW
+) AS
+BEGIN
+    DELETE FROM tb_claim
+    WHERE id = p_id;
+
+    IF SQL%ROWCOUNT = 0 THEN
+        RAISE_APPLICATION_ERROR(-20032, 'Reclamação não encontrada para exclusão.');
+    END IF;
+
+    COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        RAISE_APPLICATION_ERROR(-20033, 'Erro ao excluir reclamação: ' || SQLERRM);
+END delete_tb_claim;
+/
+
+
 -- Função com Cursor e Joins para Relatório Formatado (20 pontos):
 
 CREATE OR REPLACE FUNCTION report_consultations RETURN SYS_REFCURSOR AS
@@ -337,4 +424,74 @@ BEGIN
             c.consultation_date;
     RETURN v_cursor;
 END report_consultations;
+/
+
+-- Função para Relatório com Regra de Negócio:
+
+CREATE OR REPLACE TYPE report_row AS OBJECT (
+    dentist_name VARCHAR2(255),
+    patient_name VARCHAR2(255),
+    consultation_date DATE,
+    consultation_value NUMBER,
+    claim_count NUMBER,
+    risk_status VARCHAR2(50)
+);
+/
+
+CREATE OR REPLACE TYPE report_table AS TABLE OF report_row;
+/
+
+CREATE OR REPLACE FUNCTION generate_report (
+    p_start_date IN DATE,
+    p_end_date IN DATE
+) RETURN report_table AS
+    v_report report_table := report_table();
+BEGIN
+    SELECT 
+        d.name AS dentist_name,
+        p.name AS patient_name,
+        c.consultation_date,
+        SUM(c.consultation_value) AS consultation_value,
+        COUNT(cl.id) AS claim_count,
+        p.risk_status
+    BULK COLLECT INTO v_report
+    FROM 
+        tb_consultation c
+    INNER JOIN 
+        tb_patient p ON c.patient_id = p.id
+    INNER JOIN 
+        consultation_dentist cd ON c.id = cd.consultation_id
+    INNER JOIN 
+        tb_dentist d ON cd.dentist_id = d.id
+    LEFT JOIN 
+        tb_claim cl ON c.id = cl.consultation_id
+    WHERE 
+        c.consultation_date BETWEEN p_start_date AND p_end_date
+    GROUP BY 
+        d.name, p.name, c.consultation_date, p.risk_status
+    ORDER BY 
+        d.name, c.consultation_date;
+
+    RETURN v_report;
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE_APPLICATION_ERROR(-20050, 'Erro ao gerar relatório: ' || SQLERRM);
+END generate_report;
+/
+
+-- Execultando o codigo
+DECLARE
+    v_report report_table;
+BEGIN
+    v_report := generate_report(TO_DATE('2024-01-01', 'YYYY-MM-DD'), TO_DATE('2024-12-31', 'YYYY-MM-DD'));
+    
+    FOR i IN 1 .. v_report.COUNT LOOP
+        DBMS_OUTPUT.PUT_LINE('Dentista: ' || v_report(i).dentist_name || 
+                             ', Paciente: ' || v_report(i).patient_name || 
+                             ', Data da Consulta: ' || v_report(i).consultation_date || 
+                             ', Valor da Consulta: ' || v_report(i).consultation_value || 
+                             ', Número de Reclamações: ' || v_report(i).claim_count || 
+                             ', Status de Risco: ' || v_report(i).risk_status);
+    END LOOP;
+END;
 /
