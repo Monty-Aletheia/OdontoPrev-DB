@@ -56,11 +56,13 @@ BEGIN
         RETURN FALSE;
     END IF;
 
-    RETURN TRUE; 
+    RETURN TRUE;
 EXCEPTION
     WHEN OTHERS THEN
-        RETURN FALSE; 
+        RETURN FALSE;
 END validate_dentist;
+
+/
 
 --  Procedures para Operações CRUD (20 pontos):
 
@@ -170,7 +172,6 @@ EXCEPTION
         ROLLBACK;
         RAISE_APPLICATION_ERROR(-20009, 'Erro ao inserir dentista: ' || SQLERRM);
 END;
-
 /
 
 CREATE OR REPLACE PROCEDURE update_dentist(

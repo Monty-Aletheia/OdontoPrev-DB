@@ -15,6 +15,7 @@ CREATE TABLE tb_patient (
 CREATE TABLE tb_dentist (
     id RAW(16) DEFAULT SYS_GUID() PRIMARY KEY,
     name VARCHAR2(255) NOT NULL,
+    password VARCHAR2(255) NOT NULL,
     specialty VARCHAR2(255),
     registration_number VARCHAR2(50) UNIQUE NOT NULL,
     claims_rate NUMBER(5, 2) DEFAULT 0.00,
