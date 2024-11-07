@@ -337,7 +337,7 @@ EXCEPTION
     WHEN OTHERS THEN
         ROLLBACK;
         RAISE_APPLICATION_ERROR(-20027, 'Erro ao inserir reclamação: ' || SQLERRM);
-END insert_tb_claim;
+END insert_claim;
 /
 
 CREATE OR REPLACE PROCEDURE update_claim (
@@ -375,7 +375,7 @@ EXCEPTION
     WHEN OTHERS THEN
         ROLLBACK;
         RAISE_APPLICATION_ERROR(-20031, 'Erro ao atualizar reclamação: ' || SQLERRM);
-END update_tb_claim;
+END update_claim;
 /
 
 CREATE OR REPLACE PROCEDURE delete_claim (
@@ -394,7 +394,7 @@ EXCEPTION
     WHEN OTHERS THEN
         ROLLBACK;
         RAISE_APPLICATION_ERROR(-20033, 'Erro ao excluir reclamação: ' || SQLERRM);
-END delete_tb_claim;
+END delete_claim;
 /
 
 
@@ -429,7 +429,7 @@ END report_consultations;
 
 -- Função para Relatório com Regra de Negócio:
 
-CREATE OR REPLACE TYPE report_row AS OBJECT (
+CREATE OR REPLACE TYPE report_row FORCE AS OBJECT (
     dentist_name VARCHAR2(255),
     patient_name VARCHAR2(255),
     consultation_date DATE,
@@ -437,6 +437,7 @@ CREATE OR REPLACE TYPE report_row AS OBJECT (
     claim_count NUMBER,
     risk_status VARCHAR2(50)
 );
+
 /
 
 CREATE OR REPLACE TYPE report_table AS TABLE OF report_row;
