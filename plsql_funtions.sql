@@ -40,12 +40,13 @@ CREATE OR REPLACE FUNCTION validate_dentist (
     p_registration_number IN VARCHAR2,
     p_risk_status IN VARCHAR2
 ) RETURN BOOLEAN AS
+    v_count INTEGER;
 BEGIN
     IF p_name IS NULL OR TRIM(p_name) = '' THEN
         RETURN FALSE;
     END IF;
 
-     IF p_password IS NULL OR TRIM(p_password) = '' THEN
+    IF p_password IS NULL OR TRIM(p_password) = '' THEN
         RETURN FALSE;
     END IF;
 
@@ -61,10 +62,18 @@ BEGIN
         RETURN FALSE;
     END IF;
 
-    RETURN TRUE;
+    SELECT COUNT(*) INTO v_count
+    FROM dentists
+    WHERE registration_number = p_registration_number;
+
+    IF v_count > 0 THEN
+        RETURN FALSE;  
+    END IF;
+
+    RETURN TRUE;  
 EXCEPTION
     WHEN OTHERS THEN
-        RETURN FALSE;
+        RETURN FALSE;  
 END validate_dentist;
 
 /
@@ -252,7 +261,8 @@ CREATE OR REPLACE PROCEDURE insert_consultation(
     p_risk_status VARCHAR2,
     p_description VARCHAR2,
     p_patient_id RAW,
-    p_consultation_id OUT RAW 
+    p_dentist_ids IN SYS.ODCIVARCHAR2LIST, 
+    p_consultation_id OUT RAW
 ) AS
 BEGIN
     IF p_consultation_date IS NULL OR p_consultation_value IS NULL OR p_patient_id IS NULL THEN
@@ -265,23 +275,31 @@ BEGIN
 
     INSERT INTO tb_consultation (consultation_date, consultation_value, risk_status, description, patient_id)
     VALUES (p_consultation_date, p_consultation_value, p_risk_status, p_description, p_patient_id)
-    RETURNING id INTO p_consultation_id;
+    RETURNING id INTO p_consultation_id; 
 
-    COMMIT;
+    FOR i IN 1 .. p_dentist_ids.COUNT LOOP
+        INSERT INTO consultation_dentist (consultation_id, dentist_id)
+        VALUES (p_consultation_id, p_dentist_ids(i)); 
+    END LOOP;
+
+    COMMIT; 
+
 EXCEPTION
     WHEN OTHERS THEN
         ROLLBACK;
         RAISE_APPLICATION_ERROR(-20017, 'Erro ao inserir consulta: ' || SQLERRM);
 END;
+
 /
 
 CREATE OR REPLACE PROCEDURE update_consultation(
-    p_id RAW,
-    p_consultation_date DATE,
-    p_consultation_value NUMBER,
+    p_id RAW,  
+    p_consultation_date DATE,  
+    p_consultation_value NUMBER,  
     p_risk_status VARCHAR2,
-    p_description VARCHAR2,
-    p_consultation_id OUT RAW
+    p_description VARCHAR2,  
+    p_dentist_ids IN SYS.ODCIVARCHAR2LIST,  
+    p_consultation_id OUT RAW 
 ) AS
 BEGIN
     IF p_consultation_date IS NULL OR p_consultation_value IS NULL THEN
@@ -299,18 +317,28 @@ BEGIN
         description = p_description,
         updated_at = CURRENT_TIMESTAMP
     WHERE id = p_id
-    RETURNING id INTO p_consultation_id;
+    RETURNING id INTO p_consultation_id;  
 
     IF SQL%ROWCOUNT = 0 THEN
         RAISE_APPLICATION_ERROR(-20020, 'Consulta não encontrada para atualização.');
     END IF;
 
-    COMMIT;
+    DELETE FROM consultation_dentist
+    WHERE consultation_id = p_id;
+
+    FOR i IN 1 .. p_dentist_ids.COUNT LOOP
+        INSERT INTO consultation_dentist (consultation_id, dentist_id)
+        VALUES (p_consultation_id, p_dentist_ids(i));  
+    END LOOP;
+
+    COMMIT;  
+
 EXCEPTION
     WHEN OTHERS THEN
-        ROLLBACK;
+        ROLLBACK;  
         RAISE_APPLICATION_ERROR(-20021, 'Erro ao atualizar consulta: ' || SQLERRM);
 END;
+
 /
 
 CREATE OR REPLACE PROCEDURE delete_consultation(
