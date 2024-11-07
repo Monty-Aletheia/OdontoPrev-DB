@@ -56,9 +56,10 @@ CREATE TABLE consultation_dentist (
     consultation_id RAW(16) NOT NULL,
     dentist_id RAW(16) NOT NULL,
     PRIMARY KEY (consultation_id, dentist_id),
-    FOREIGN KEY (consultation_id) REFERENCES tb_consultation(id),
-    FOREIGN KEY (dentist_id) REFERENCES tb_dentist(id)
+    FOREIGN KEY (consultation_id) REFERENCES tb_consultation(id) ON DELETE CASCADE,
+    FOREIGN KEY (dentist_id) REFERENCES tb_dentist(id) ON DELETE CASCADE
 );
+
 
 -- DROP TABLE consultation_dentist;
 -- DROP TABLE tb_claim;
@@ -71,3 +72,4 @@ Select * from tb_claim;
 Select * from tb_consultation;
 Select * from tb_dentist;
 Select * from tb_patient;
+
