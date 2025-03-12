@@ -60,16 +60,27 @@ CREATE TABLE consultation_dentist (
     FOREIGN KEY (dentist_id) REFERENCES tb_dentist(id) ON DELETE CASCADE
 );
 
+CREATE TABLE audit_log (
+    id NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    table_name VARCHAR2(50) NOT NULL,
+    operation_type VARCHAR2(10) NOT NULL,
+    record_id RAW(16) NOT NULL,
+    old_values CLOB,
+    new_values CLOB,
+    changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 
 -- DROP TABLE consultation_dentist;
 -- DROP TABLE tb_claim;
 -- DROP TABLE tb_consultation;
 -- DROP TABLE tb_dentist;
 -- DROP TABLE tb_patient;
+-- DROP TABLE audit_log;
 
 Select * from consultation_dentist;
 Select * from tb_claim;
 Select * from tb_consultation;
 Select * from tb_dentist;
 Select * from tb_patient;
-
+Select * from audit_log;
