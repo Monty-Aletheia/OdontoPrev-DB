@@ -71,3 +71,17 @@ CREATE OR REPLACE PACKAGE BODY dental_clinic_pkg AS
 
 END dental_clinic_pkg;
 /
+
+
+-- Executando PROCEDURE
+
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('=== Relatório de Pacientes ===');
+    dental_clinic_pkg.generate_patient_report;
+
+    DBMS_OUTPUT.PUT_LINE(CHR(10));
+
+    DBMS_OUTPUT.PUT_LINE('=== Relatório de Sinistros por Dentista ===');
+    dental_clinic_pkg.generate_dentist_claim_report;
+END;
+/
