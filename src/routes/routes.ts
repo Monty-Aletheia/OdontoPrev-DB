@@ -21,7 +21,7 @@ export default (app: Express): void => {
     router.delete('/patient/:id', async (req, res) => {
         await deletePatient(req, res);
     });
-    router.get('/patient/:id/claims', async (req, res) => {
+    router.get('/seed-patient', async (req, res) => {
         await seedPatient(req, res)
     });
     app.use('/api', router);

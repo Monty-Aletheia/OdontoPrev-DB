@@ -1,10 +1,8 @@
-import { faker } from "@faker-js/faker/.";
+import { faker } from "@faker-js/faker";
 import { Gender, RiskStatus } from "../models/patientSchema";
-import { v4 as uuidv4 } from 'uuid';
 
 function generateRandomPatient() {
   return {
-    _id: uuidv4(),
     name: faker.person.fullName(),
     birthday: faker.date.birthdate({ min: 18, max: 90, mode: 'age' }),
     gender: faker.helpers.arrayElement(Object.values(Gender)),
