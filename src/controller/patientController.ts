@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import patientSchema from '../models/patientSchema';
-
+import fs from 'fs';
 
 // CREATE
 export async function createPatient(req: Request, res: Response) {
@@ -72,4 +72,10 @@ export async function deletePatient(req: Request, res: Response) {
   } catch (error) {
     res.status(500).json({ message: 'Erro ao excluir paciente', error });
   }
+}
+
+export async function exportDataset(req: Request, res: Response) {
+  const patients = await patientSchema.find();
+  fs.writeFileSync('./data/patients.json', JSON.stringify(patients, null, 2));
+  return res.status(200).json({message: 'Dataset exportado para data/patients.json'});
 }
