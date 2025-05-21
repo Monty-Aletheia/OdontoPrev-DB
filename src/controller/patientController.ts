@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import patientSchema from '../models/patientSchema';
 import fs from 'fs';
+import { generatePatients } from '../util/seeder';
 
 // CREATE
 export async function createPatient(req: Request, res: Response) {
@@ -78,4 +79,14 @@ export async function exportDataset(req: Request, res: Response) {
   const patients = await patientSchema.find();
   fs.writeFileSync('./data/patients.json', JSON.stringify(patients, null, 2));
   return res.status(200).json({message: 'Dataset exportado para data/patients.json'});
+}
+
+export async function seedPatient(req: Request, res: Response) {
+  try {
+    const patients = generatePatients(10);
+    await patientSchema.insertMany(patients);
+    res.status(201).json({ message: 'Pacientes criados com sucesso' });
+  } catch (error) {
+    res.status(500).json({ message: 'Erro ao criar pacientes', error });
+  }
 }

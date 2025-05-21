@@ -1,5 +1,5 @@
 import { Express, Router } from 'express';
-import { createPatient, getAllPatients, getPatientById, updatePatient, deletePatient, exportDataset } from '../controller/patientController';
+import { createPatient, getAllPatients, getPatientById, updatePatient, deletePatient, exportDataset, seedPatient } from '../controller/patientController';
 
 export default (app: Express): void => {
     const router : Router = Router();
@@ -20,6 +20,9 @@ export default (app: Express): void => {
     });
     router.delete('/patient/:id', async (req, res) => {
         await deletePatient(req, res);
+    });
+    router.get('/patient/:id/claims', async (req, res) => {
+        await seedPatient(req, res)
     });
     app.use('/api', router);
 }
