@@ -49,12 +49,23 @@ API RESTful para gerenciamento de pacientes odontológicos, desenvolvida em Node
 
 ```json
 {
-  "name": "João da Silva",
-  "birthday": "1990-05-21T00:00:00.000Z",
-  "gender": "MALE",
-  "riskStatus": "LOW",
-  "consultationFrequency": 2,
-  "associatedClaims": "Nenhuma"
+  "idade": 35,
+  "genero": "MALE",
+  "frequencia_consultas": 2,
+  "aderencia_tratamento": 1,
+  "historico_caries": false,
+  "doenca_periodontal": false,
+  "numero_implantes": 0,
+  "fumante": false,
+  "alcoolismo": false,
+  "escovacao_diaria": 3,
+  "uso_fio_dental": 1,
+  "doencas_sistemicas": "Nenhuma",
+  "medicamentos_uso_continuo": false,
+  "numero_sinistros_previos": 0,
+  "valor_medio_sinistros": 0,
+  "tratamentos_complexos_previos": false,
+  "tipo_plano": "BASICO"
 }
 ```
 
